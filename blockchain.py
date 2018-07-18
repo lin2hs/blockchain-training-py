@@ -2,6 +2,7 @@ import json
 import logging
 import socket
 import time
+import hashlib
 from datetime import datetime
 from threading import Thread
 
@@ -18,8 +19,10 @@ class Block(object):
         self.hash = hashvalue
 
     def calculate_hash(self):
-        # TODO
-        pass
+        hash_cal = hashlib.sha256()
+        hash_cal.update(str(self.index) + str(self.previous_hash)
+         + str(self.timestamp) + str(self.data) + str(self.nonce)) 
+        return hash_cal.digest()
 
     @staticmethod
     def from_previous(block, data):
@@ -73,9 +76,15 @@ class Server(object):
         # TODO
         pass
 
+    def create_account(self):
+        # POST '/account'
+        # 'password: abcpornhubxyz'
+        # 'public key & private key respone'
+
     def add_transactions(self):
         # TODO
         pass
+        # from: 'account', to: '', amount: 25, signature: '', 
 
     def run(self, host='0.0.0.0'):
         logging.info('Starting...')
