@@ -3,11 +3,11 @@ import logging
 import socket
 import time
 import hashlib
+import Crypto.PublicKey.RSA as RSA
 from datetime import datetime
 from threading import Thread
 
 from flask import Flask, jsonify
-
 
 class Block(object):
     def __init__(self, index, previous_hash, timestamp, data, nonce, hashvalue=''):
@@ -65,6 +65,7 @@ class Server(object):
         self.http.route('/peers', methods=['GET'])(self.list_peers)
         self.http.route('/blocks', methods=['POST'])(self.add_blocks)
         self.http.route('/transactions', methods=['POST'])(self.add_transactions)
+        self.http.route('/account', methods=['GET'])(self.create_account)
 
     def list_blocks(self):
         return jsonify(self.blocks)
@@ -77,9 +78,11 @@ class Server(object):
         pass
 
     def create_account(self):
-        # POST '/account'
-        # 'password: abcpornhubxyz'
-        # 'public key & private key respone'
+        key = RSA.generate(1024)
+        pubkey = key.publickey().exportKey('PEM').hex()
+        prikey = key.exportKey('PEM').hex()
+        args = {'publickey': pubkey, 'privatekey': prikey}
+        return jsonify(args)
 
     def add_transactions(self):
         # TODO
