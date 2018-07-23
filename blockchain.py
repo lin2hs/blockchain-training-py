@@ -4,10 +4,11 @@ import socket
 import time
 import hashlib
 import Crypto.PublicKey.RSA as RSA
+import Crypto.Signature as SNTR
 from datetime import datetime
 from threading import Thread
 
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 
 class Block(object):
     def __init__(self, index, previous_hash, timestamp, data, nonce, hashvalue=''):
@@ -53,6 +54,7 @@ class Server(object):
     def __init__(self):
         self.blocks = [GENESIS]
         self.peers = {}
+        self.state = {}
 
         self.udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.udp.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
@@ -81,13 +83,24 @@ class Server(object):
         key = RSA.generate(1024)
         pubkey = key.publickey().exportKey('PEM').hex()
         prikey = key.exportKey('PEM').hex()
-        args = {'publickey': pubkey, 'privatekey': prikey}
+        balance = 3041975
+        self.state[pubkey] = balance
+        args = {pubkey, prikey, balance}
         return jsonify(args)
 
     def add_transactions(self):
-        # TODO
-        pass
-        # from: 'account', to: '', amount: 25, signature: '', 
+        if request.method == 'POST':
+            # verify signature
+            this_pubkey = request.get('pubkey')
+            this_balance = self.state.get(this_pubkey, 0)
+            if this_balance >= request.get('balance'):
+                #TODO
+                pass
+            else:
+                #TODO
+                pass
+        else:
+            print('Wrong move, kid! Turn around and check it, please.')
 
     def run(self, host='0.0.0.0'):
         logging.info('Starting...')
